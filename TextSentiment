@@ -1,0 +1,45 @@
+#Connect to API
+TxtAnalURL = 'westus.api.cognitive.microsoft.com'
+TxtAnalKey = 'ab504139aff8417ab2f8f1602a5ecd1e'
+
+#Libraries
+import urllib.parse, http.client, urllib.request, urllib.error, json
+
+#Request parameters
+headers = {
+    'Content-Type' : 'application/json',
+    'Ocp-Apim-Subscription-Key' : TxtAnalKey,
+    'Accept' : 'application/json'
+}
+
+body = {
+    'documents' : [
+        {
+            'language' : 'en',
+            'id' : '1',
+            'text' : 'This line is a piece of junk. Everything about it is as negative as can be.'
+        },
+        {
+            'language' : 'en',
+            'id' : '2',
+            'text' :  'Rainbows and unicorns are lovely'
+        }
+    ]
+}
+
+par = urllib.parse.urlencode({})
+
+try:
+    connection = http.client.HTTPSConnection(TxtAnalURL)
+    connection.request('POST', '/text/analytics/v2.0/sentiment%s' %par, str(body), headers)
+    response = connection.getresponse()
+    jsondata = response.read().decode('UTF-8')
+    pydata = json.loads(jsondata)
+    for doc in pydata['documents']:
+        sentiment = 'positive'
+        if doc['score'] <= 0.5:
+            sentiment = 'negative'
+        print('Document ' + doc['id'] + ' has a ' + str(doc['score']) + ' sentiment')
+    connection.close()
+except Exception as ex:
+    print(ex.strerror)
